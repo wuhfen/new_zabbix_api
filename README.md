@@ -8,27 +8,27 @@ email: mola2333@gmail.com
 ## main function
 
  > 关键字查找请输入：select
- 
+
  > 创建主机请输入：create_h
- 
+
  > 创建组请输入：create_g
- 
+
  > 给主机添加模板请输入：add_t
- 
+
  > 取消主机模板请输入：rm_t
- 
+
  > 给主机添加组请输入：add_g
- 
+
  > 取消主机组请输入：rm_g
- 
+
  > 删除主机请输入：del_h
- 
+
  > 删除组请输入：del_g
- 
+
  > 删除模板请输入：del_t
- 
+
  > 查询信息请输入：show
- 
+
  > 退出输入：exit
 
 ## show function
@@ -39,3 +39,5 @@ email: mola2333@gmail.com
  	5.显示所有组
  	6.显示所有模板
  	7.返回
+
+ ![images](images\images.jpg)
