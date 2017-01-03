@@ -40,4 +40,4 @@ email: mola2333@gmail.com
  	6.显示所有模板
  	7.返回
 
- ![images](images\images.jpg)
+ ![images](https://github.com/wuhfen/new_zabbix_api/raw/master/images/images.jpg)
