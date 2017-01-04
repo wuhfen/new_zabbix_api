@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+##author: murphy##
+##email: mola2333@gmail.com##
+
 import sys
 import json
 import urllib2
@@ -34,14 +37,20 @@ class zabbixtools(object):
             request.add_header(key,self.header[key])
         try:
             result = urllib2.urlopen(request)
-        except URLError as e:
-            print "Auth Failed, Please Check Your Name And Password:",e.code
+        except:
+            print "Auth Failed, Please Check Your Url"
+            sys.exit()
         else:
-            response = json.loads(result.read())
-            result.close()
-            authID = response['result']
-            #print authID
-            return authID
+            try:
+                response = json.loads(result.read())
+                result.close()
+                #print response
+                authID = response['result']
+            except KeyError as e:
+                print "Auth Failed, Please Check Your Name And Password:",e.code
+                sys.exit()
+            else:
+                return authID
 
     def list_output(self,gglist,number):
         a = 0
