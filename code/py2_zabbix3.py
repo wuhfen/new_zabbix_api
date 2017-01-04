@@ -242,9 +242,10 @@ class zabbixtools(object):
 
 
     def host_create(self,hostip,hostname,hostport,hostgroup):
-        hostid = self.host_get(hostip)
-
+        #hostid = self.host_get(hostip)
+        judge = self.show_host_name()
         groupid = self.group_get(hostgroup)
+        templateid = self.template_get("Template OS Linux")
         data = json.dumps({
             "jsonrpc": "2.0",
             "method": "host.create",
@@ -261,20 +262,20 @@ class zabbixtools(object):
                         "port": hostport
                     }
                 ],
-                "groups": [
-                    {
-                        "groupid": groupid
-                    }
-                ],
+                "groups": [{"groupid": groupid }],
+                "templates": [{"templateid": templateid }],
                 "inventory_mode": 0,
             },
             "auth": self.authID,
             "id": 1
             })
-        if hostid == 0:
-            res = self.get_data(data)['result']
+        #print hostid
+        #print self.get_data(data)
+        if hostip not in judge['host'] and hostname not in judge['name']:
+           res = self.get_data(data)['result']
+           print '\t',"\033[1;32;40m%s\033[0m" % "IP：%s 添加成功"% hostip
         else:
-            print '\t',"\033[1;31;40m%s\033[0m" % "This host aleady exists in zabbix!"
+            print '\t',"\033[1;31;40m%s\033[0m" % "IP: %s or NAME: %s aleady exists in zabbix!"% (hostip,hostname)
             res = 0
         return res
 
@@ -298,6 +299,29 @@ class zabbixtools(object):
                 self.list_output(nlist,8)
             if unlist: 
                 self.list_output(unlist,8)
+
+
+    def show_host_name(self):
+        data = json.dumps({
+            "jsonrpc": "2.0",
+            "method": "host.get",
+            "params": {
+                "output":["name","host"],
+                },
+            "auth": self.authID,
+            "id": 1
+            })
+        res = self.get_data(data)['result']
+        host_dict = {}
+        if (res != 0) and (len(res) !=0 ):
+            hlist = [i['host'] for i in res]
+            nlist = [i['name'] for i in res]
+            host_dict['host'] = hlist
+            host_dict['name'] = nlist
+            return host_dict
+        else:
+            return 0
+
 
     def select_info(self,key):
         hdata = json.dumps({
@@ -358,7 +382,7 @@ class zabbixtools(object):
 
 
     def host_delete(self,hostip):
-        hostid = host_get(hostip)
+        hostid = self.host_get(hostip)
         data = json.dumps({
             "jsonrpc": "2.0",
             "method": "host.delete",
@@ -944,6 +968,49 @@ def select_key():
                 break 
     judge_fun()
 
+def batch_create_host():
+    print '\t\t',"\033[1;35;40m%s\033[0m" % "批量添加需要提供一个绝对路径的文件（例：/tmp/hosts.txt）"
+    print '\t\t',"\033[1;35;40m%s\033[0m" % "端口和组如果没有提供的话，默认10050，Linux servers"
+    print '\t\t',"\033[1;35;40m%s\033[0m" % "默认添加模板“Template OS Linux”"
+    print '\t', "\033[1;37;40m%s\033[0m" % "文件格式(可只提供一个IP):"
+    print '\t\t',"\033[1;36;40m%s\033[0m" % "192.168.0.1 ,test001 ,10050 ,Linux servers"
+    while True:
+        src = raw_input("请输入hosts文件路径：")
+        if src:
+            break
+    if os.path.isfile(src):
+        file_object = open(src,'rU')
+        try:
+            for line in file_object:
+                ll = line.strip('\n').split(',')
+                if not line.strip('\n'):
+                    continue
+                ip = ll[0].strip()
+                if not check_ip(ip):
+                    print '\t',"无效IP：%s" % ip
+                    continue  
+                try:
+                    name = ll[1].strip()
+                except IndexError:
+                    name = ip
+                try:
+                    port = ll[2].strip()
+                except IndexError:
+                    port = '10050'
+                try:
+                    groupname = ll[3].strip()
+                except IndexError:
+                    groupname = "Linux servers"
+                zai.host_create(ip,name,port,groupname)
+                
+        finally:
+            file_object.close()
+    else:
+        print '\t',"\033[1;31;40m%s\033[0m" % "文件不可用"
+    judge_fun()    
+
+
+
 def choice_show(choice):
     if choice == '1':
         select_host_information()
@@ -964,16 +1031,18 @@ def choice_show(choice):
 
 
 def main():
-    print "\033[1;33;40m%s\033[0m" % "关键字查找请输入：select\r\n创建主机请输入：create_h\r\n创建组请输入：create_g\r\n给主机添加模板请输入：add_t\r\n取消主机模板请输入：rm_t\r\n给主机添加组请输入：add_g\r\n取消主机组请输入：rm_g\r\n删除主机请输入：del_h\r\n删除组请输入：del_g\r\n删除模板请输入：del_t\r\n查询信息请输入：show\r\n退出输入：exit"
+    print "\033[1;33;40m%s\033[0m" % "关键字查找请输入：select\r\n创建主机请输入：create_h\r\n批量创建主机请输入：batch\r\n创建组请输入：create_g\r\n给主机添加模板请输入：add_t\r\n取消主机模板请输入：rm_t\r\n给主机添加组请输入：add_g\r\n取消主机组请输入：rm_g\r\n删除主机请输入：del_h\r\n删除组请输入：del_g\r\n删除模板请输入：del_t\r\n查询信息请输入：show\r\n退出输入：exit"
     while True:
         args = raw_input("请选择你想执行的类型：")
-        if args in ['select','show_all','create_h','create_g','add_g','add_t','rm_t','rm_g','del_h','del_g','del_t','show','exit']:
+        if args in ['select','show_all','create_h','batch','create_g','add_g','add_t','rm_t','rm_g','del_h','del_g','del_t','show','exit']:
             break
         else:
             print '\t',"\033[1;31;40m%s\033[0m" % "选择项不正确！"
     print '\t',"\033[1;35;40m%s\033[0m" % '你输入的是: %s' % args
     if args == 'create_h':
         add_one_host()
+    if args == 'batch':
+        batch_create_host()
     if args == 'create_g':
         create_one_group()
     if args == 'add_t':
