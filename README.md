@@ -3,11 +3,25 @@ base on zabbix 3.0 api in python
 use python
 email: mola2333@gmail.com
 # 简单介绍
-> 英语不太溜，就不装逼了，实现了一些简单的功能
+> 英语不太溜，就不装逼了，实现了一些简单的功能。
+>
+> 主机的增、删、查、改；
+>
+> 组的增、删、查；
+>
+> 模板的增、删、查；
+>
+> 监控项的查找；
+>
+> 批量创建主机；
+>
+> 其他功能敬请期待。
 
 ## main function
 
  > 关键字查找请输入：select
+
+> 批量创建主机请输入：batch
 
  > 创建主机请输入：create_h
 
@@ -40,4 +54,10 @@ email: mola2333@gmail.com
  	6.显示所有模板
  	7.返回
 
+
+
  ![images](https://github.com/wuhfen/new_zabbix_api/raw/master/images/images.jpg)
+
+
+
+ ![showhost](https://github.com/wuhfen/new_zabbix_api/raw/master/images/showhost.jpg)
